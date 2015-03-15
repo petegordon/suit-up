@@ -4,9 +4,9 @@ DatabaseConnection = new sqlite3.Database('../desire.db');
 
   var MyObject = require('./MyObject');
 
-  var ObjectDesire = require('./ObjectDesire');
-
   var MyDesire = require('./MyDesire');
+
+  var ObjectDesire = require('./ObjectDesire');
 
 
 
@@ -20,8 +20,8 @@ DatabaseConnection = new sqlite3.Database('../desire.db');
 
   });
 
-  ObjectDesire.queryAll(function(allObjectDesires){
-    console.log(allObjectDesires.length + '. ObjectDesire records.');
+  MyDesire.queryAll(function(allMyDesires){
+    console.log(allMyDesires.length + '. MyDesire records.');
 
     //Create a new Object
     //Save the Object (insert)
@@ -30,8 +30,8 @@ DatabaseConnection = new sqlite3.Database('../desire.db');
 
   });
 
-  MyDesire.queryAll(function(allMyDesires){
-    console.log(allMyDesires.length + '. MyDesire records.');
+  ObjectDesire.queryAll(function(allObjectDesires){
+    console.log(allObjectDesires.length + '. ObjectDesire records.');
 
     //Create a new Object
     //Save the Object (insert)

@@ -109,11 +109,8 @@ MyObject.db = function(){
                  console.log(err);
                  fnCallback(err);
                }
-            }
-       }
-       console.log('------------END DELETE MyObject----------'+new Date());
-
-     });
+               console.log('------------END DELETE MyObject----------'+new Date());
+       });
   }
 
  /**
@@ -176,9 +173,9 @@ MyObject.queryByPrimaryKeyId = function( id, fnCallback ){
 
   /**
    * Method to query related [object Object]s and return an array of [object Object] instances
-   */`  `
+   */
   MyObject.prototype.getObjectDesires = function(fnCallback){
-    ObjectDesire.queryByForeignKeyObjectId( this.id, fnCallback );
+    ObjectDesire.queryByForeignKeyMyObjectId( this.id, fnCallback );
   }
 
 

@@ -109,11 +109,8 @@ MyDesire.db = function(){
                  console.log(err);
                  fnCallback(err);
                }
-            }
-       }
-       console.log('------------END DELETE MyDesire----------'+new Date());
-
-     });
+               console.log('------------END DELETE MyDesire----------'+new Date());
+       });
   }
 
  /**
@@ -176,9 +173,9 @@ MyDesire.queryByPrimaryKeyId = function( id, fnCallback ){
 
   /**
    * Method to query related [object Object]s and return an array of [object Object] instances
-   */`  `
+   */
   MyDesire.prototype.getObjectDesires = function(fnCallback){
-    ObjectDesire.queryByForeignKeyDesireId( this.id, fnCallback );
+    ObjectDesire.queryByForeignKeyMyDesireId( this.id, fnCallback );
   }
 
 

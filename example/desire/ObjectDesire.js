@@ -1,23 +1,25 @@
 
 
 
-  
 
+
+var MyDesire = require('./MyDesire');
+var MyObject = require('./MyObject');
 
 /**
  *
  * Model Object Constructor
  *
  */
-function ObjectDesire( id, objectId, desireId ){
+function ObjectDesire( id, myObjectId, myDesireId ){
 
-  
+
     this.id = id;
-  
-    this.objectId = objectId;
-  
-    this.desireId = desireId;
-  
+
+    this.myObjectId = myObjectId;
+
+    this.myDesireId = myDesireId;
+
 
 }
 
@@ -36,11 +38,11 @@ ObjectDesire.db = function(){
    var currentObject = this;
 
    console.log('------------SAVE ObjectDesire-----------'+new Date());
-    
+
     if(typeof this.id == 'undefined'){
       this.id = -1;
     }
-    
+
 
    //query by current Primary Key
    var sql = "select * from object_desire where id = ?";
@@ -57,8 +59,8 @@ ObjectDesire.db = function(){
              if(results.length >= 1){
                //when exists
                //execute update statement
-               ObjectDesire.db().run('update object_desire set  object_id = ? and  desire_id = ?  where  id = ? ',
-      [ currentObject.objectId , currentObject.desireId , currentObject.id],
+               ObjectDesire.db().run('update object_desire set  my_object_id = ? and  my_desire_id = ?  where  id = ? ',
+      [ currentObject.myObjectId , currentObject.myDesireId , currentObject.id],
        function(err, results){
                  if(err){
                    throw err;
@@ -67,8 +69,8 @@ ObjectDesire.db = function(){
                });
              } else {
                //when not exists execute insert statement
-               ObjectDesire.db().run('insert into object_desire( object_id , desire_id ) VALUES( ? , ? )',
-               [ currentObject.objectId , currentObject.desireId ],
+               ObjectDesire.db().run('insert into object_desire( my_object_id , my_desire_id ) VALUES( ? , ? )',
+               [ currentObject.myObjectId , currentObject.myDesireId ],
                  function(err, results){
                  if(err){
                    throw err;
@@ -92,11 +94,11 @@ ObjectDesire.db = function(){
        var currentObject = this;
 
        console.log('------------DELETE ObjectDesire-----------'+new Date());
-        
+
         if(typeof this.id == 'undefined'){
           this.id = -1;
         }
-        
+
 
        //query by current Primary Key
        var sql = "delete from object_desire where id = ?";
@@ -109,11 +111,8 @@ ObjectDesire.db = function(){
                  console.log(err);
                  fnCallback(err);
                }
-            }
-       }
-       console.log('------------END DELETE ObjectDesire----------'+new Date());
-
-     });
+               console.log('------------END DELETE ObjectDesire----------'+new Date());
+       });
   }
 
  /**
@@ -173,13 +172,13 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
 
 
   /**
-   *  Method to query an array of ObjectDesire instances by Foreign Key(s)  (desireId, objectId)
+   *  Method to query an array of ObjectDesire instances by Foreign Key(s)  (myDesireId, myObjectId)
    */
-  ObjectDesire.queryByForeignKeysDesireIdAndObjectId = function( desireId, objectId, fnCallback ){
-    console.log('------------FOREIGN KEY QUERY ObjectDesire(desireId, objectId)-----------'+new Date());
-    var sql = "select * from object_desire where desireId = ? and objectId = ?";
+  ObjectDesire.queryByForeignKeysMyDesireIdAndMyObjectId = function( myDesireId, myObjectId, fnCallback ){
+    console.log('------------FOREIGN KEY QUERY ObjectDesire(myDesireId, myObjectId)-----------'+new Date());
+    var sql = "select * from object_desire where myDesireId = ? and myObjectId = ?";
     console.log(sql);
-    ObjectDesire.db().all(sql, [desireId, objectId], function(err, results){
+    ObjectDesire.db().all(sql, [myDesireId, myObjectId], function(err, results){
       if(err){
         console.log('ERROR::');
         console.log(err);
@@ -195,20 +194,20 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
           fnCallback(results);
         }
       }
-      console.log('------------END FOREIGN KEY QUERY ObjectDesire(desireId, objectId)-----------'+new Date());
+      console.log('------------END FOREIGN KEY QUERY ObjectDesire(myDesireId, myObjectId)-----------'+new Date());
 
     });
   }
 
 
   /**
-   *  Method to query an array of ObjectDesire instances by Foreign Key(s)  (desireId)
+   *  Method to query an array of ObjectDesire instances by Foreign Key(s)  (myDesireId)
    */
-  ObjectDesire.queryByForeignKeyDesireId = function( desireId, fnCallback ){
-    console.log('------------FOREIGN KEY QUERY ObjectDesire(desireId)-----------'+new Date());
-    var sql = "select * from object_desire where desire_id = ?";
+  ObjectDesire.queryByForeignKeyMyDesireId = function( myDesireId, fnCallback ){
+    console.log('------------FOREIGN KEY QUERY ObjectDesire(myDesireId)-----------'+new Date());
+    var sql = "select * from object_desire where my_desire_id = ?";
     console.log(sql);
-    ObjectDesire.db().all(sql, [desireId], function(err, results){
+    ObjectDesire.db().all(sql, [myDesireId], function(err, results){
       if(err){
         console.log('ERROR::');
         console.log(err);
@@ -224,20 +223,20 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
           fnCallback(results);
         }
       }
-      console.log('------------END FOREIGN KEY QUERY ObjectDesire(desireId)-----------'+new Date());
+      console.log('------------END FOREIGN KEY QUERY ObjectDesire(myDesireId)-----------'+new Date());
 
     });
   }
 
 
   /**
-   *  Method to query an array of ObjectDesire instances by Foreign Key(s)  (objectId)
+   *  Method to query an array of ObjectDesire instances by Foreign Key(s)  (myObjectId)
    */
-  ObjectDesire.queryByForeignKeyObjectId = function( objectId, fnCallback ){
-    console.log('------------FOREIGN KEY QUERY ObjectDesire(objectId)-----------'+new Date());
-    var sql = "select * from object_desire where object_id = ?";
+  ObjectDesire.queryByForeignKeyMyObjectId = function( myObjectId, fnCallback ){
+    console.log('------------FOREIGN KEY QUERY ObjectDesire(myObjectId)-----------'+new Date());
+    var sql = "select * from object_desire where my_object_id = ?";
     console.log(sql);
-    ObjectDesire.db().all(sql, [objectId], function(err, results){
+    ObjectDesire.db().all(sql, [myObjectId], function(err, results){
       if(err){
         console.log('ERROR::');
         console.log(err);
@@ -253,7 +252,7 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
           fnCallback(results);
         }
       }
-      console.log('------------END FOREIGN KEY QUERY ObjectDesire(objectId)-----------'+new Date());
+      console.log('------------END FOREIGN KEY QUERY ObjectDesire(myObjectId)-----------'+new Date());
 
     });
   }
@@ -264,19 +263,18 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
 
 
   /**
-   * Method to query related Desire instance
+   * Method to query related MyDesire instance
    */
-  ObjectDesire.prototype.getDesire = function(fnCallback){
-    Desire.queryByPrimaryKey(this.desireId, fnCallback);
+  ObjectDesire.prototype.getMyDesire = function(fnCallback){
+    MyDesire.queryByPrimaryKeyId(this.myDesireId, fnCallback);
   }
 
   /**
-   * Method to query related Object instance
+   * Method to query related MyObject instance
    */
-  ObjectDesire.prototype.getObject = function(fnCallback){
-    Object.queryByPrimaryKey(this.objectId, fnCallback);
+  ObjectDesire.prototype.getMyObject = function(fnCallback){
+    MyObject.queryByPrimaryKeyId(this.myObjectId, fnCallback);
   }
 
 
 module.exports = ObjectDesire
-
