@@ -6,8 +6,8 @@ CREATE TABLE my_object(
 DROP TABLE IF EXISTS object_desire;
 CREATE TABLE object_desire(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  object_id INTEGER NOT NULL,
-  desire_id INTEGER NOT NULL,
+  my_object_id INTEGER NOT NULL,
+  my_desire_id INTEGER NOT NULL,
   FOREIGN KEY(object_id) REFERENCES my_object(id),
   FOREIGN KEY(desire_id) REFERENCES my_desire(id)
 );

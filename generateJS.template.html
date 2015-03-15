@@ -107,11 +107,8 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
                  console.log(err);
                  fnCallback(err);
                }
-            }
-       }
-       console.log('------------END DELETE {{table.name}}----------'+new Date());
-
-     });
+               console.log('------------END DELETE {{table.name}}----------'+new Date());
+       });
   }
 
  /**
@@ -203,7 +200,7 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
 <template repeat="{{relatedTable in table.relatedTables}}">
   /**
    * Method to query related {{relatedTable}}s and return an array of {{relatedTable}} instances
-   */`  `
+   */
   {{table.name}}.prototype.get{{relatedTable.name}}s = function(fnCallback){
     {{relatedTable.name}}.{{relatedTable.signature}}( {{relatedTable.signatureParams}}, fnCallback );
   }
