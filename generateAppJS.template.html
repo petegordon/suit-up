@@ -1,0 +1,18 @@
+var sqlite3 = require('sqlite3').verbose();
+DatabaseConnection = new sqlite3.Database('../{{dbName}}');
+
+<template repeat="{{table in tables}}">
+  var {{table.name}} = require('./{{table.name}}');
+</template>
+
+<template repeat="{{table in tables}}">
+  {{table.name}}.queryAll(function(all{{table.name}}s){
+    console.log(all{{table.name}}s.length + '. {{table.name}} records.');
+
+    //Create a new Object
+    //Save the Object (insert)
+    //Query the Object by Primary Key
+    //Change the Object property value and Save the Object (update)
+
+  });
+</template>

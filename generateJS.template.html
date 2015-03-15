@@ -1,0 +1,222 @@
+
+<template bind="{{t as table}}">
+
+  <template repeat="{{relatedTable1 in table.relatedTables}}">
+var {{relatedTable1.name}} = require('./{{relatedTable1.name}}');
+  </template>
+
+
+/**
+ *
+ * Model Object Constructor
+ *
+ */
+function {{table.name}}( <template repeat="{{column, i in table.columns}}"><template if="{{i > 0}}">, </template>{{column.varName}}</template> ){
+
+  <template repeat="{{column in table.columns}}">
+    this.{{column.varName}} = {{column.varName}};
+  </template>
+
+}
+
+//Object Singleton for database connection
+{{table.name}}.db = function(){
+  return DatabaseConnection;
+}
+
+/**
+ * Save a {{table.name}} instance.
+ *
+ * Will query to see if it exists first, then update if it exists and insert if it does not exist.
+ */
+ {{table.name}}.prototype.save = function(fnCallback){
+
+   var currentObject = this;
+
+   console.log('------------SAVE {{table.name}}-----------'+new Date());
+    <template repeat="{{pk, i in table.primaryKeyColumns}}">
+    if(typeof this.{{pk.varName}} == 'undefined'){
+      this.{{pk.varName}} = -1;
+    }
+    </template>
+
+   //query by current Primary Key
+   var sql = "select * from {{table.dbName}} where <template repeat="{{pk, i in table.primaryKeyColumns}}"><template if="{{ i > 0 }}">and</template>{{pk.dbName}} = ?</template>";
+   console.log(sql);
+   {{table.name}}.db().all(sql,
+        [<template repeat="{{pk, i in table.primaryKeyColumns}}"><template if="{{ i > 0 }}">,</template>currentObject.{{pk.varName}}</template>],
+        function(err, results){
+           if(err){
+             console.log('ERROR::');
+             console.log(err);
+             fnCallback(err);
+           } else {
+
+             if(results.length >= 1){
+               //when exists
+               //execute update statement
+               {{table.name}}.db().run('update {{table.dbName}} set <template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}"> and </template> {{c.dbName}} = ? </template> where <template repeat="{{pk, i in table.primaryKeyColumns}}"><template if="{{ i > 0 }}"> and </template> {{pk.dbName}} = ? </template>',
+      [<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> currentObject.{{c.varName}} </template><template repeat="{{pk, i in table.primaryKeyColumns}}">, currentObject.{{pk.varName}}</template>],
+       function(err, results){
+                 if(err){
+                   throw err;
+                 }
+                 fnCallback();
+               });
+             } else {
+               //when not exists execute insert statement
+               {{table.name}}.db().run('insert into {{table.dbName}}(<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> {{c.dbName}} </template>) VALUES(<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> ? </template>)',
+               [<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> currentObject.{{c.varName}} </template>],
+                 function(err, results){
+                 if(err){
+                   throw err;
+                 }
+                 fnCallback(this.lastID);
+               });
+             }
+           }
+           console.log('------------END SAVE {{table.name}}-----------'+new Date());
+
+         });
+ }
+
+ /**
+  * Delete a {{table.name}} instance.
+  *
+  * Will delete the instance of this {{table.name}} based on primary keys ({{table.primaryKeyColumns}}).
+  */
+  {{table.name}}.prototype.delete = function(fnCallback){
+
+       var currentObject = this;
+
+       console.log('------------DELETE {{table.name}}-----------'+new Date());
+        <template repeat="{{pk, i in table.primaryKeyColumns}}">
+        if(typeof this.{{pk.varName}} == 'undefined'){
+          this.{{pk.varName}} = -1;
+        }
+        </template>
+
+       //query by current Primary Key
+       var sql = "delete from {{table.dbName}} where <template repeat="{{pk, i in table.primaryKeyColumns}}"><template if="{{ i > 0 }}">and</template>{{pk.dbName}} = ?</template>";
+       console.log(sql);
+       {{table.name}}.db().run(sql,
+            [<template repeat="{{pk, i in table.primaryKeyColumns}}"><template if="{{ i > 0 }}">,</template>currentObject.{{pk.varName}}</template>],
+            function(err, results){
+               if(err){
+                 console.log('ERROR::');
+                 console.log(err);
+                 fnCallback(err);
+               }
+            }
+       }
+       console.log('------------END DELETE {{table.name}}----------'+new Date());
+
+     });
+  }
+
+ /**
+  * Methods to query all {{table.name}} instances.
+  */
+ {{table.name}}.queryAll= function( fnCallback ){
+   console.log('------------ALL QUERY {{table.name}}-----------'+new Date());
+   var sql = "select * from {{table.dbName}}";
+   console.log(sql);
+   {{table.name}}.db().all(sql, [], function(err, results){
+     if(err){
+       console.log('ERROR::');
+       console.log(err);
+       fnCallback(err);
+     } else {
+         for(var i=0; i<results.length; i++){
+           results[i].__proto__ = {{table.name}}.prototype;
+         }
+         fnCallback(results);
+     }
+     console.log('------------END ALL QUERY {{table.name}}_----------'+new Date());
+
+   });
+ }
+
+
+<template repeat="{{s in table.primaryKeySignatureSQLs}}">
+/**
+ * Methods to query a {{table.name}} instance by Primary Key(s) ({{s.signatureParams}})
+ */
+{{table.name}}.{{s.signature}} = function( {{s.signatureParams}}, fnCallback ){
+  console.log('------------PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+  var sql = "{{s.sql}}";
+  console.log(sql);
+  {{table.name}}.db().all(sql, [{{s.signatureParams}}], function(err, results){
+    if(err){
+      console.log('ERROR::');
+      console.log(err);
+      fnCallback(err);
+    } else {
+      if (results.length == 1){
+        results[0].__proto__ = {{table.name}}.prototype;
+        fnCallback(results[0]);
+      } else if (results.length > 1){
+        for(var i=0; i<results.length; i++){
+          results[i].__proto__ = {{table.name}}.prototype;
+        }
+        fnCallback(results);
+      }
+    }
+    console.log('------------END PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+
+  });
+}
+
+</template>
+
+<template repeat="{{s in table.foreignKeySignatureSQLs}}">
+  /**
+   *  Method to query an array of {{table.name}} instances by Foreign Key(s)  ({{s.signatureParams}})
+   */
+  {{table.name}}.{{s.signature}} = function( {{s.signatureParams}}, fnCallback ){
+    console.log('------------FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+    var sql = "{{s.sql}}";
+    console.log(sql);
+    {{table.name}}.db().all(sql, [{{s.signatureParams}}], function(err, results){
+      if(err){
+        console.log('ERROR::');
+        console.log(err);
+        fnCallback(err);
+      } else {
+        if (results.length == 1){
+          results[0].__proto__ = {{table.name}}.prototype;
+          fnCallback(results[0]);
+        } else if (results.length > 1){
+          for(var i=0; i<results.length; i++){
+            results[i].__proto__ = {{table.name}}.prototype;
+          }
+          fnCallback(results);
+        }
+      }
+      console.log('------------END FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+
+    });
+  }
+
+</template>
+
+<template repeat="{{relatedTable in table.relatedTables}}">
+  /**
+   * Method to query related {{relatedTable}}s and return an array of {{relatedTable}} instances
+   */`  `
+  {{table.name}}.prototype.get{{relatedTable.name}}s = function(fnCallback){
+    {{relatedTable.name}}.{{relatedTable.signature}}( {{relatedTable.signatureParams}}, fnCallback );
+  }
+</template>
+
+<template repeat="{{fk in table.foreignKeyColumns}}">
+  /**
+   * Method to query related {{fk.objectName}} instance
+   */
+  {{table.name}}.prototype.get{{fk.objectName}} = function(fnCallback){
+    {{fk.objectName}}.queryByPrimaryKey(this.{{fk.varName}}, fnCallback);
+  }
+</template>
+
+module.exports = {{table.name}}
+</template>
