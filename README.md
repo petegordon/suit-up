@@ -1,3 +1,7 @@
+1 issue; I know I need to address.  The foreign key column names require you to be exact in relationship back to the table they refer.  (This is causing me problems with my example I still need to fix)
+
+
+
 ## What you need
 You need a SQLite CREATE sql script or an existing SQLite database from which you would like to create JavaScript Object sweetness.
 
@@ -43,3 +47,10 @@ CREATE TABLE my_desire(
 );
 ```
 See the complete [generated code](example/desire/)
+
+## Why I did this?
+
+* I love Fred Brooks idea of **conceptual integrity** in *The Mythical Man Month*.  I think it is a sorely missed, major component to developing software. I wanted to bring that conceptual integrity from SQL to Javascript.
+* I had used code generation tools previously ([MyGeneration](http://mygeneration.sourceforge.net/) and [CodeSmith](http://www.codesmithtools.com/product/generator)) to generate the object/classes from a RDBMS.  And, I wanted one for Javascript.
+* Planning on doing more with Javscript on the server (node.js) in addition to the client browsers.
+* Hoping others also find it useful.
