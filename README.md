@@ -1,1 +1,45 @@
-# conceptual-integrity
+## What you need
+You need a SQLite CREATE sql script or an existing SQLite database from which you would like to create JavaScript Object sweetness.
+
+[node-sqlite3](mapbox/node-sqlite3) for SQLite database connection to read metadata
+
+		npm install node-sqlite3
+
+[htmling](codemix/htmling) Template Engine using Polymer syntax was used to create the JavaScript file templates.
+
+		npm install htmling
+
+
+
+## How to use?
+  Start with a SQL create tables script or an existing SQLite3 database. Run one of these commands.
+
+#### SQL create script
+		$ node generateJS my.sql
+
+#### SQLite database
+		$ node generateJS -db my.db
+
+## What do you get?
+  You will get a Javascript Object File for each table.  Each object will use underscore (_) to create capital letters for Object name, Function (method) names, and variables in CamelCase/camelCase format.  Each object will also have related prototype functions and static functions to get[MyObject]s, and queryByPrimaryKey, queryByForeignKey.
+  
+Here's an example create sql script to start with...
+
+```sql
+CREATE TABLE my_object(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  is_something TEXT
+);
+CREATE TABLE object_desire(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  object_id INTEGER NOT NULL,
+  desire_id INTEGER NOT NULL,
+  FOREIGN KEY(object_id) REFERENCES my_object(id),
+  FOREIGN KEY(desire_id) REFERENCES my_desire(id)
+);
+CREATE TABLE my_desire(
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  wants_something TEXT
+);
+```
+See the complete [generated code](example/desire/)
