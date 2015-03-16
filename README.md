@@ -1,4 +1,4 @@
-1 issue; I know I need to address.  The foreign key column names require you to be exact in relationship back to the table they refer.  (This is causing me problems with my example I still need to fix)
+# Does not really work as of yet!  Coming soon.
 
 
 
