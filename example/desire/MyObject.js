@@ -1,9 +1,9 @@
 
 
 
-  
+
 var ObjectDesire = require('./ObjectDesire');
-  
+
 
 
 /**
@@ -13,11 +13,11 @@ var ObjectDesire = require('./ObjectDesire');
  */
 function MyObject( id, isSomething ){
 
-  
+
     this.id = id;
-  
+
     this.isSomething = isSomething;
-  
+
 
 }
 
@@ -36,11 +36,11 @@ MyObject.db = function(){
    var currentObject = this;
 
    console.log('------------SAVE MyObject-----------'+new Date());
-    
+
     if(typeof this.id == 'undefined'){
       this.id = -1;
     }
-    
+
 
    //query by current Primary Key
    var sql = "select * from my_object where id = ?";
@@ -92,11 +92,11 @@ MyObject.db = function(){
        var currentObject = this;
 
        console.log('------------DELETE MyObject-----------'+new Date());
-        
+
         if(typeof this.id == 'undefined'){
           this.id = -1;
         }
-        
+
 
        //query by current Primary Key
        var sql = "delete from my_object where id = ?";
@@ -120,6 +120,7 @@ MyObject.db = function(){
    console.log('------------ALL QUERY MyObject-----------'+new Date());
    var sql = "select * from my_object";
    console.log(sql);
+
    MyObject.db().all(sql, [], function(err, results){
      if(err){
        console.log('ERROR::');
@@ -134,6 +135,16 @@ MyObject.db = function(){
      console.log('------------END ALL QUERY MyObject_----------'+new Date());
 
    });
+   if(fnCallback == null){
+     console.log('still working.');
+     var i = 0;
+     while(!done){
+       if(i%100 == 0){
+         process.stdout.write('.');
+       }
+       i++;
+     }
+   }
  }
 
 
@@ -182,4 +193,3 @@ MyObject.queryByPrimaryKeyId = function( id, fnCallback ){
 
 
 module.exports = MyObject
-

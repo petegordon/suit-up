@@ -1,6 +1,7 @@
 
 <template bind="{{t as table}}">
 
+var sync = require('deasync');
   <template repeat="{{relatedTable1 in table.relatedTables}}">
 var {{relatedTable1.name}} = require('./{{relatedTable1.name}}');
   </template>
@@ -24,6 +25,16 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
   return DatabaseConnection;
 }
 
+{{table.name}}.getObjectFromSQLResult = function(sqlResult){
+
+  var obj = new {{table.name}}();
+  <template repeat="{{column in table.columns}}">
+  obj.{{column.varName}} = sqlResult.{{column.dbName}};
+  </template>
+  return obj;
+
+}
+
 /**
  * Save a {{table.name}} instance.
  *
@@ -31,6 +42,7 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
  */
  {{table.name}}.prototype.save = function(fnCallback){
 
+   var ret;
    var currentObject = this;
 
    console.log('------------SAVE {{table.name}}-----------'+new Date());
@@ -49,7 +61,13 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
            if(err){
              console.log('ERROR::');
              console.log(err);
-             fnCallback(err);
+             if(fnCallback == null){
+               ret = err;
+             }else{
+               console.log('------------ASYNC END SAVE {{table.name}}----------'+new Date());
+               fnCallback(err);
+             }
+
            } else {
 
              if(results.length >= 1){
@@ -57,27 +75,43 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
                //execute update statement
                {{table.name}}.db().run('update {{table.dbName}} set <template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}"> and </template> {{c.dbName}} = ? </template> where <template repeat="{{pk, i in table.primaryKeyColumns}}"><template if="{{ i > 0 }}"> and </template> {{pk.dbName}} = ? </template>',
       [<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> currentObject.{{c.varName}} </template><template repeat="{{pk, i in table.primaryKeyColumns}}">, currentObject.{{pk.varName}}</template>],
-       function(err, results){
-                 if(err){
-                   throw err;
+       function(err){
+                 if(fnCallback == null){
+                   ret = currentObject;
+                 }else{
+                   console.log('------------ASYNC END SAVE {{table.name}}_----------'+new Date());
+                   fnCallback(currentCobject);
                  }
-                 fnCallback();
                });
              } else {
                //when not exists execute insert statement
                {{table.name}}.db().run('insert into {{table.dbName}}(<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> {{c.dbName}} </template>) VALUES(<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> ? </template>)',
                [<template repeat="{{c, cnt in table.columnsNotPrimaryKey}}"><template if="{{ cnt > 0}}">,</template> currentObject.{{c.varName}} </template>],
-                 function(err, results){
+                 function(err){
                  if(err){
+                   console.log('------------ASYNC END SAVE {{table.name}} ERROR----------'+new Date());
                    throw err;
                  }
-                 fnCallback(this.lastID);
+                 currentObject.id = this.lastID;
+                 if(fnCallback == null){
+                   ret = currentObject;
+                 }else{
+                   console.log('------------ASYNC END SAVE {{table.name}}_----------'+new Date());
+                   fnCallback(currentCobject);
+                 }
                });
              }
            }
-           console.log('------------END SAVE {{table.name}}-----------'+new Date());
 
          });
+
+         if(fnCallback == null){
+           while(ret === undefined){
+             require('deasync').runLoopOnce();
+           }
+           console.log('------------SYNC END SAVE {{table.name}}_----------'+new Date());
+           return ret;
+         }
  }
 
  /**
@@ -86,6 +120,7 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
   * Will delete the instance of this {{table.name}} based on primary keys ({{table.primaryKeyColumns}}).
   */
   {{table.name}}.prototype.delete = function(fnCallback){
+       var ret;
 
        var currentObject = this;
 
@@ -101,37 +136,85 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
        console.log(sql);
        {{table.name}}.db().run(sql,
             [<template repeat="{{pk, i in table.primaryKeyColumns}}"><template if="{{ i > 0 }}">,</template>currentObject.{{pk.varName}}</template>],
-            function(err, results){
+            function(err){
                if(err){
                  console.log('ERROR::');
                  console.log(err);
-                 fnCallback(err);
+                 if(fnCallback == null){
+                   ret = err;
+                 } else {
+                   console.log('------------ASYNC END DELETE {{table.name}}----------'+new Date());
+                   fnCallback(err);
+                 }
+               } else {
+                 if(fnCallback == null){
+                   ret = true;
+                 } else {
+                   console.log('------------ASYNC END DELETE {{table.name}}----------'+new Date());
+                   fnCallback(true);
+                 }
                }
-               console.log('------------END DELETE {{table.name}}----------'+new Date());
+
        });
+
+       if(fnCallback == null){
+         while(ret === undefined){
+           require('deasync').runLoopOnce();
+         }
+         console.log('------------SYNC END DELETE {{table.name}}_----------'+new Date());
+         return ret;
+       }
+
   }
 
  /**
   * Methods to query all {{table.name}} instances.
   */
  {{table.name}}.queryAll= function( fnCallback ){
-   console.log('------------ALL QUERY {{table.name}}-----------'+new Date());
+   var ret;
+
+    if(fnCallback == null){
+      console.log('------------SYNC ALL QUERY {{table.name}}-----------'+new Date());
+    }else{
+      console.log('------------ASYNC ALL QUERY {{table.name}}-----------'+new Date());
+    }
+
    var sql = "select * from {{table.dbName}}";
    console.log(sql);
    {{table.name}}.db().all(sql, [], function(err, results){
      if(err){
        console.log('ERROR::');
        console.log(err);
-       fnCallback(err);
+       if(fnCallback == null){
+         ret = err;
+       } else {
+         console.log('------------ASYNC END ALL QUERY {{table.name}}_----------'+new Date());
+         fnCallback(err);
+       }
      } else {
+         var objects = [];
          for(var i=0; i<results.length; i++){
-           results[i].__proto__ = {{table.name}}.prototype;
+           objects.push({{table.name}}.getObjectFromSQLResult(results[i]));
          }
-         fnCallback(results);
+         if(fnCallback == null){
+           ret = objects;
+         } else {
+           console.log('------------ASYNC END ALL QUERY {{table.name}}_----------'+new Date());
+           fnCallback(objects);
+         }
      }
-     console.log('------------END ALL QUERY {{table.name}}_----------'+new Date());
+
 
    });
+
+   if(fnCallback == null){
+     while(ret === undefined){
+       require('deasync').runLoopOnce();
+     }
+     console.log('------------SYNC END ALL QUERY {{table.name}}_----------'+new Date());
+     return ret;
+   }
+
  }
 
 
@@ -140,28 +223,61 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
  * Methods to query a {{table.name}} instance by Primary Key(s) ({{s.signatureParams}})
  */
 {{table.name}}.{{s.signature}} = function( {{s.signatureParams}}, fnCallback ){
-  console.log('------------PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+  var ret;
+
+  if(fnCallback == null){
+    console.log('------------SYNC PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+  }else{
+    console.log('------------ASYNC PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+  }
+
+
   var sql = "{{s.sql}}";
   console.log(sql);
   {{table.name}}.db().all(sql, [{{s.signatureParams}}], function(err, results){
     if(err){
       console.log('ERROR::');
       console.log(err);
-      fnCallback(err);
+      if(fnCallback == null){
+        ret = err;
+      }else{
+        console.log('------------ASYNC END PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+        fnCallback(err);
+      }
     } else {
       if (results.length == 1){
-        results[0].__proto__ = {{table.name}}.prototype;
-        fnCallback(results[0]);
-      } else if (results.length > 1){
-        for(var i=0; i<results.length; i++){
-          results[i].__proto__ = {{table.name}}.prototype;
+        var obj = {{table.name}}.getObjectFromSQLResult(results[0]);
+        if(fnCallback == null){
+          ret = obj;
+        }else{
+          console.log('------------ASYNC END PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+          fnCallback(obj);
         }
-        fnCallback(results);
+      } else if (results.length > 1){
+        var objects = [];
+        for(var i=0; i<results.length; i++){
+          objects.push({{table.name}}.getObjectFromSQLResult(results[i]));
+        }
+        if(fnCallback == null){
+          ret = objects;
+        }else{
+          console.log('------------ASYNC END PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+          fnCallback(objects);
+        }
       }
     }
-    console.log('------------END PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+
 
   });
+
+
+  if(fnCallback == null){
+     while(ret === undefined){
+       require('deasync').runLoopOnce();
+     }
+     console.log('------------SYNC END PRIMARY KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+     return ret;
+  }
 }
 
 </template>
@@ -171,28 +287,60 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
    *  Method to query an array of {{table.name}} instances by Foreign Key(s)  ({{s.signatureParams}})
    */
   {{table.name}}.{{s.signature}} = function( {{s.signatureParams}}, fnCallback ){
-    console.log('------------FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+    var ret;
+
+    if(fnCallback == null){
+      console.log('------------SYNC FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+    } else {
+      console.log('------------ASYNC FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+    }
+
     var sql = "{{s.sql}}";
     console.log(sql);
     {{table.name}}.db().all(sql, [{{s.signatureParams}}], function(err, results){
       if(err){
         console.log('ERROR::');
         console.log(err);
-        fnCallback(err);
+        if(fnCallback == null){
+          ret = err;
+        } else {
+          console.log('------------ASYNC END FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+          fnCallback(err);
+        }
       } else {
         if (results.length == 1){
-          results[0].__proto__ = {{table.name}}.prototype;
-          fnCallback(results[0]);
-        } else if (results.length > 1){
-          for(var i=0; i<results.length; i++){
-            results[i].__proto__ = {{table.name}}.prototype;
+          var obj = {{table.name}}.getObjectFromSQLResult(results[0]);
+          if(fnCallback == null){
+            ret = obj;
+          } else {
+            console.log('------------ASYNC END FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+            fnCallback(obj);
           }
-          fnCallback(results);
+        } else if (results.length > 1){
+          var objects = [];
+          for(var i=0; i<results.length; i++){
+            objects.push({{table.name}}.getObjectFromSQLResult(results[i]));
+          }
+          if(fnCallback == null){
+            ret = objects;
+          } else {
+            console.log('------------ASYNC END FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+            fnCallback(objects);
+          }
         }
-      }
-      console.log('------------END FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+    }
+
 
     });
+
+    if(fnCallback == null){
+       while(ret === undefined){
+         require('deasync').runLoopOnce();
+       }
+       console.log('------------SYNC END FOREIGN KEY QUERY {{table.name}}({{s.signatureParams}})-----------'+new Date());
+       return ret;
+    }
+
   }
 
 </template>

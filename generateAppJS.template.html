@@ -5,14 +5,59 @@ DatabaseConnection = new sqlite3.Database('../{{dbName}}');
   var {{table.name}} = require('./{{table.name}}');
 </template>
 
+
+/**
+ *  Asynchronous calls for Querying Objects.
+ */
 <template repeat="{{table in tables}}">
   {{table.name}}.queryAll(function(all{{table.name}}s){
-    console.log(all{{table.name}}s.length + '. {{table.name}} records.');
-
-    //Create a new Object
-    //Save the Object (insert)
-    //Query the Object by Primary Key
-    //Change the Object property value and Save the Object (update)
+    console.log('ASYNC ALL::'+all{{table.name}}s.length + '. {{table.name}} records.');
 
   });
+</template>
+
+
+/**
+ *  Synchronous calls for working with Objects.
+ */
+<template repeat="{{table in tables}}">
+  var all{{table.name}}s = {{table.name}}.queryAll();
+  console.log('SYNC ALL::'+all{{table.name}}s.length + '. {{table.name}} records.');
+
+  <template if="{{table.foreignKeyColumns == 0}}">
+    //Create a new Object
+    var newObject = new {{table.name}}();
+    console.log(newObject);
+
+    <template repeat="{{c, i in table.columnsNotKey}}">
+      newObject.{{c.varName}} = {{i}};
+    </template>
+
+    //Save the Object (insert)
+    var newObjectSaved = newObject.save();
+    console.log(newObjectSaved);
+
+    //Change the Object property value and Save the Object (update)
+    <template repeat="{{c, i in table.columnsNotKey}}">
+      newObjectSaved.{{c.varName}} = {{999}};
+    </template>
+
+    //Update the Object
+    var updatedObject = newObjectSaved.save();
+    console.log(updatedObject);
+
+    //Show all Objects
+    var allObjects = {{table.name}}.queryAll();
+    console.log(allObjects);
+
+    //Delete the Object
+    var successfulDelete = updatedObject.delete();
+    console.log('successful delete:'+successfulDelete);
+
+    //Show all Objects
+    var allObjects = {{table.name}}.queryAll();
+    console.log(allObjects);
+
+  </template>
+
 </template>
