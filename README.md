@@ -1,4 +1,4 @@
-1 issue; I know I need to address.  The foreign key column names require you to be exact in relationship back to the table they refer.  (This is causing me problems with my example I still need to fix)
+# Does not really work as of yet!  Coming soon.
 
 
 
@@ -50,7 +50,8 @@ See the complete [generated code](example/desire/)
 
 ## Why I did this?
 
-* I love Fred Brooks idea of **conceptual integrity** in *The Mythical Man Month*.  I think it is a sorely missed, major component to developing software. I wanted to bring that conceptual integrity from SQL to Javascript.
+* I love Fred Brooks idea of **conceptual integrity** in *The Mythical Man Month*.  Whether you call it **conceptual integrity**, **ubiquitious language** in domain driven design, or a **data dictionary**, I think it is a sorely missed, major component to developing software. I wanted to bring that conceptual integrity from SQL to Javascript.
 * I had used code generation tools previously ([MyGeneration](http://mygeneration.sourceforge.net/) and [CodeSmith](http://www.codesmithtools.com/product/generator)) to generate the object/classes from a RDBMS.  And, I wanted one for Javascript.
 * Planning on doing more with Javscript on the server (node.js) in addition to the client browsers.
+* [Software takes TACT](http://www.softwaretakestact.com); and Communication is a huge part of TACT.
 * Hoping others also find it useful.
