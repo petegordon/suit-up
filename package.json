@@ -1,0 +1,27 @@
+{
+  "name": "conceptual-integrity",
+  "version": "1.0.0",
+  "description": "",
+  "main": "desire_app.js",
+  "directories": {
+    "example": "example"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "sqlite3": ">=3.1.1",
+    "deasync": ">=0.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/petegordon/conceptual-integrity.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/petegordon/conceptual-integrity/issues"
+  },
+  "homepage": "https://github.com/petegordon/conceptual-integrity#readme"
+}
