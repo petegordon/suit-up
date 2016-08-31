@@ -1,5 +1,5 @@
 {
-  "name": "conceptual-integrity",
+  "name": "suit-tailor",
   "version": "1.0.0",
   "description": "",
   "main": "desire_app.js",
@@ -7,12 +7,14 @@
     "example": "example"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node ./bin/generateJS",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "sqlite3": ">=3.1.1",
-    "deasync": ">=0.1.4"
+    "deasync": ">=0.1.4",
+    "htmling": ">=0.0.7",
+    "yargs": "5.0.0"
   },
   "repository": {
     "type": "git",
@@ -23,5 +25,10 @@
   "bugs": {
     "url": "https://github.com/petegordon/conceptual-integrity/issues"
   },
-  "homepage": "https://github.com/petegordon/conceptual-integrity#readme"
+  "homepage": "https://github.com/petegordon/conceptual-integrity#readme",
+  "preferGlobal": "true",
+  "bin" : {
+    "suit-tailor" : "./bin/generateJS",
+    "suit" : "./bin/generateJS"
+  }
 }
