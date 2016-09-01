@@ -1,0 +1,4 @@
+var sqlite3 = require('sqlite3').verbose();
+DatabaseConnection = new sqlite3.Database('../{{dbName}}');
+
+module.exports = DatabaseConnection;

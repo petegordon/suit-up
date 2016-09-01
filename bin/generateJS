@@ -339,5 +339,10 @@ function createDatabaseMetadata(){
     var exampleAppJSFile = exampleAppTemplate.render(databaseMetadata);
     fs.writeFileSync(process.cwd()+'/'+databaseMetadata.name+'/'+'app'+'.js', exampleAppJSFile);
 
+
+    var databaseTemplate = HTMLing.file(__dirname+'/'+"generateDatabaseConnectionJS.template.html");
+    var databaseJSFile = databaseTemplate.render(databaseMetadata);
+    fs.writeFileSync(process.cwd()+'/'+databaseMetadata.name+'/'+'DatabaseConnection'+'.js', databaseJSFile);    
+
   });
 }

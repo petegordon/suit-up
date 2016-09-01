@@ -2,6 +2,8 @@
 <template bind="{{t as table}}">
 
 var sync = require('deasync');
+var DatabaseConnection = require('./DatabaseConnection');
+
   <template repeat="{{relatedTable1 in table.relatedTables}}">
 var {{relatedTable1.name}} = require('./{{relatedTable1.name}}');
   </template>
