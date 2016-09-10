@@ -1,5 +1,3 @@
-# Does not really work as of yet!  Coming soon.
-
 
 
 ## What you need
