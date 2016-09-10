@@ -11,9 +11,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "sqlite3": ">=3.1.1",
+    "body-parser": "^1.15.2",
     "deasync": ">=0.1.4",
     "htmling": ">=0.0.7",
+    "sqlite3": ">=3.1.1",
     "yargs": "5.0.0"
   },
   "repository": {
@@ -27,8 +28,8 @@
   },
   "homepage": "https://github.com/petegordon/conceptual-integrity#readme",
   "preferGlobal": "true",
-  "bin" : {
-    "suit-tailor" : "./bin/generateJS",
-    "suit" : "./bin/generateJS"
+  "bin": {
+    "suit-tailor": "./bin/generateJS",
+    "suit": "./bin/generateJS"
   }
 }
