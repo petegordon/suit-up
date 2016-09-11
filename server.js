@@ -1,6 +1,6 @@
-var express = require('express')
-var app = express()
-
+var express = require('express');
+var app = express();
+var bodyParser = require('body-parser');
 var sqlite3 = require('sqlite3').verbose();
 
 
@@ -9,6 +9,12 @@ DatabaseConnection = new sqlite3.Database('./desire.db');
 var MyObject = require('./desire/MyObject.js');
 var ObjectDesire = require('./desire/ObjectDesire.js');
 var MyDesire = require('./desire/MyDesire.js');
+
+app.use(express.static('public'));
+app.use('/desire', express.static('desire'));
+
+app.use(bodyParser.json());
+
 
 app.get('/', function (req, res) {
   var output = 'Hello World!';
@@ -28,6 +34,12 @@ app.get('/', function (req, res) {
 })
 app.post('/save/:object', function(req, res){
   console.log(req.params.object);
+  var object = req.body;
+  console.log(object);
+  Object.setPrototypeOf(object, eval(req.params.object+'.prototype'));
+  console.log(object);
+  object = object.save();
+  res.send(object);
 });
 app.get('/queryObjectByPK/:object/:id', function(req, res){
   var obj = eval(req.params.object).queryByPrimaryKeyId(req.params.id);
@@ -44,6 +56,26 @@ app.get('/queryAllObjects/:object', function(req, res){
   console.log(objArray);
   console.log(req.params.object);
   res.send(objArray);
+});
+
+app.get('/pageObjects/:object/:start/:end', function(req, res){
+  console.log('all object');
+  console.log(req.params);
+  var tableName = req.params.object;
+  var objArray = eval(req.params.object).queryAll();
+  var start = parseInt(req.params.start);
+  var end = parseInt(req.params.end);
+  var startZeroBased = start-1;
+  var endZeroBased = end-1;
+  var resultArray = objArray.slice(startZeroBased, endZeroBased)
+  console.log(req.params.object);
+  var tablePage = {};
+  tablePage.table = tableName;
+  tablePage.total = objArray.length;
+  tablePage.start = start;
+  tablePage.end = end;
+  tablePage.result = resultArray;
+  res.send(tablePage);
 });
 
 app.get('/queryObjectByFK/:object/:fkObject/:fkName/:fkId', function(req, res){
