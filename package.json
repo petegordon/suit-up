@@ -29,6 +29,6 @@
   "homepage": "https://github.com/petegordon/conceptual-integrity#readme",
   "preferGlobal": "true",
   "bin": {
-    "suit-up": "./bin/generateJS",
+    "suit-up": "./bin/generateJS"
   }
 }
