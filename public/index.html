@@ -62,6 +62,12 @@
         margin-top: 6px;
     }
 
+    [contenteditable=true] {
+        background-color: white;
+        border: 1px solid #000;
+        color:#000;
+    }
+
     tbody tr:nth-child(2n){
           background-color: rgba(247, 247, 154, 0.16);
     }
@@ -89,17 +95,10 @@
 
     }
   </style>
-<!--
-HOW AM I GOING TO USE THE JAVASCRIPT ON THE CLIENT????
 
-Thinking about generating the constructor in its own file ex. MyObject_Client.  Sounds like Meteor doesn't it.
-I'm not certain as of yet.  So, I'm going to ignore it for now.  Will come back to Prototype/Constructor in the UI.
-
-
-  <script src='desire/MyObject.js'></script>
-  <script src='desire/MyDesire.js'></script>
-  <script src='desire/ObjectDesire.js'></script>
--->
+  <script src='js/MyObject.js'></script>
+  <script src='js/MyDesire.js'></script>
+  <script src='js/ObjectDesire.js'></script>
 
 
   <!--[if lt IE 9]>
@@ -111,10 +110,36 @@ I'm not certain as of yet.  So, I'm going to ignore it for now.  Will come back 
 
   var currentMaxRecord = 0;
   var totalMaxRecord = 0;
+  var lastLoad = new Date(0);  //1970 for starting date
   var numOfRecordsToGet = 2;
 
   $(document).ready(function() {
 
+
+    $(document).on('mouseup', 'tbody tr .cell', function(evt){
+      $(evt.target).attr('contenteditable','true');
+      $(evt.target).focus();
+      var originalValue = $(evt.target).text();
+      $(evt.target).on('blur', function(evt){
+        $(evt.target).attr('contenteditable','false');
+        var newValue = $(evt.target).text();
+        if(newValue != originalValue){
+          //read table name of udpate
+          var tableName = $(evt.target).closest('table').find('caption .table-title').text();
+          console.log(tableName);
+          //row to object
+          var nameElements = $(evt.target).closest('table').find('thead tr th.column-name');
+          var valueElements = $(evt.target).closest('tr').find('td');
+
+          var obj = {};
+          for(var i=0; i<nameElements.length; i++){
+            obj[$(nameElements[i]).text()] = $(valueElements[i]).text();
+          }
+          save(tableName, obj);
+        }
+        //change object and save.
+      });
+    });
 
 
 //    var win = $(window);
@@ -131,24 +156,33 @@ I'm not certain as of yet.  So, I'm going to ignore it for now.  Will come back 
 
 
 
-    function saveMyObject(json){
-      var submitJSON = (json)?json:{"isSomething":"something"};
-      console.log(submitJSON);
+    function save(table, json, callback){
+      if(!table){
+        throw new Error("saveObject:Table not defined table:"+table);
+      }
+      if(!json){
+        throw new Error("saveObject:JSON not defined json:"+json)
+      }
       $.ajax({
         type: 'POST',
-        url: '/save/MyObject',
-        data: JSON.stringify(submitJSON), // or JSON.stringify ({name: 'jonas'}),
-        success: function(data) { console.log(data); },
+        url: '/save/'+table,
+        data: JSON.stringify(json), // or JSON.stringify ({name: 'jonas'}),
+        success: function(data) {
+          console.log(data);
+          if(callback){
+            callback();
+          }
+        },
         contentType: "application/json",
         dataType: 'json'
       });
 
     }
 
-    function getObjects(table, page, displayCount, callback){
+    function getObjects(table, start, end, callback){
       $.ajax({
         type: 'GET',
-        url: '/pageObjects/'+table+'/'+page+'/'+displayCount,
+        url: '/pageObjects/'+table+'/'+start+'/'+end,
         success: function(data) {
 /**
 SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
@@ -166,25 +200,33 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
     }
 
     function createTable(tableName){
-      getObjects(tableName, 1, 10, function(paging){
+      getObjects(tableName, 0, 10, function(paging){
+/*
         //determine numberOfColumns
         var numberOfColumns = Object.keys(paging.result[0]).length;
         var columnWidth = (((100)/numberOfColumns)-0.5)+'%';
+
         console.log(numberOfColumns);
         console.log(columnWidth);
         $('tbody td').css('width',  columnWidth);
         $('thead th').css('width',  columnWidth);
+*/
 
         //build table header caption
         $('<caption/>', {
             id: paging.table+'-table-header-caption',
             class: 'caption'
         }).prependTo('#table');
-        $('#'+paging.table+'-table-header-caption').append($('<span/>', {style:'left:20px;position:relative',text:tableName}))
+        $('#'+paging.table+'-table-header-caption').append($('<span/>', {class:'table-title', style:'left:20px;position:relative',text:tableName}))
         //add loading icon before caption Entity name.
         var loading = $('#loading.template');
         loading.removeClass('template');
         $('#'+paging.table+'-table-header-caption').append(loading);
+
+        //add plus button to Table caption float right
+        var plusButton = $('#add-object').clone();
+        plusButton.attr('id', paging.table+'-add-object-plus-button');
+        $('#'+paging.table+'-table-header-caption').append(plusButton);
 
         //build header row
         $('<thead/>').appendTo('#table');
@@ -194,11 +236,64 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
         }).appendTo('thead');
         for(property in paging.result[0]){
             $('<th/>', {
-                class: 'header-cell',
+                class: 'header-cell column-name',
                 text: property
             }).appendTo('#'+paging.table+'-table-header-row');
         }
 
+        /* add Object thead row */
+        $('<tr />', {
+          id:paging.table+"-table-header-add-object-row",
+          class:'row add-object',
+          style:'display:none'
+        }).appendTo('thead');
+
+        for(property in paging.result[0]){
+            $('<th/>', {
+                class: 'header-cell',
+                contenteditable: true,
+                text: property
+            }).appendTo('#'+paging.table+'-table-header-add-object-row');
+        }
+
+        $('<th/>', {
+          id:paging.table+'-add-object-th',
+        }).appendTo('#'+paging.table+"-table-header-add-object-row")
+
+        $('<button/>', {
+          id:paging.table+'-add-object-save-button',
+          text:'Save Record'
+        }).appendTo('#'+paging.table+'-add-object-th')
+
+        $('#'+paging.table+'-add-object-save-button').click(function(evt){
+          console.log('save');
+          //get th's for new object values
+          var valueElements = $(evt.target).closest('tr').find('th:not(#'+paging.table+'-add-object-th)');
+          var nameElements = $(evt.target).closest('table').find('thead tr th.column-name');
+          var obj = {};
+          for(var i=0; i<nameElements.length; i++){
+            obj[$(nameElements[i]).text()] = $(valueElements[i]).text();
+          }
+          console.log('object to add save');
+          console.log(obj);
+          save(paging.table, obj, function(obj){
+            $('#loading').show();
+            getObjects('MyObject', currentMaxRecord, (currentMaxRecord+numOfRecordsToGet), function(paging){
+              buildRows(paging);
+              lastLoad = new Date();
+              $('#loading').hide();
+            });
+          });
+          //hide the add/save row
+          $(evt.target).closest('tr').css('display', 'none');
+
+        });
+        $('#'+paging.table+'-add-object-plus-button').click(function(evt){
+          console.log('click plus button');
+          $(evt.target).closest('#table').find('#'+paging.table+'-table-header-add-object-row').css('display', 'block');
+        });
+
+        /* add tbody */
         $('<tbody/>').appendTo('#table');
         // Each time the user scrolls
         $('#table tbody').on('scroll', function() {
@@ -212,10 +307,15 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
           // End of the document reached?
           if ((scrollheight - (windowheight + scrolltop)) < 5){
 
-            if(currentMaxRecord <= totalMaxRecord && !$('#loading').is(":visible")){
+
+            var timeSinceLastLoad = new Date() - lastLoad;
+            console.log(timeSinceLastLoad)
+            if(timeSinceLastLoad > 500 && !$('#loading').is(":visible")){
               $('#loading').show();
+
               getObjects('MyObject', currentMaxRecord, (currentMaxRecord+numOfRecordsToGet), function(paging){
                 buildRows(paging);
+                lastLoad = new Date();
                 $('#loading').hide();
               });
             }
@@ -239,8 +339,13 @@ TODO::Let's do paging by scrolling!!!!! instead of this!!!!
       });
     }
     function buildRows(paging){
-      currentMaxRecord = paging.end;
+      if(paging.end > paging.total){
+        currentMaxRecord = paging.total+1;
+      } else {
+        currentMaxRecord = paging.end;
+      }
       totalMaxRecord = paging.total;
+
       //build rows
       for(var i=0; i<paging.result.length; i++){
         $('<tr/>', {
@@ -260,7 +365,7 @@ TODO::Let's do paging by scrolling!!!!! instead of this!!!!
 </head>
 
 <body>
-
+  <span id="add-object" style="float:right">+</span>
   <span id="loading" class="template">
   <style type='text/css'>
   @-webkit-keyframes uil-default-anim {
