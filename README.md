@@ -4,23 +4,19 @@
 You need a SQLite CREATE sql script or an existing SQLite database from which you would like to create JavaScript Object sweetness.
 
 [sqlite3](https://www.npmjs.com/package/sqlite3) for SQLite database connection to read metadata
-
-		npm install sqlite3
-
 [htmling](https://www.npmjs.com/package/htmling) Template Engine using Polymer syntax was used to create the JavaScript file templates.
+[deasync](https://www.npmjs.com/package/deasync) for deasync calls that make the API easier; but you can use async by just passing a callback parameter.
 
-		npm install htmling
-
-
+		npm install -g petegordon/suit-up
 
 ## How to use?
   Start with a create tables SQL script or an existing SQLite3 database. Run one of these commands.
 
 #### SQL create script
-		$ node generateJS my.sql
+		$ suit-up my.sql
 
 #### SQLite database
-		$ node generateJS -db my.db
+		$ suit-up -db my.db
 
 ## What do you get?
   You will get a Javascript Object File for each table.  Each object will use underscore (_) to create capital letters for Object name, Function (method) names, and variables in CamelCase/camelCase format.  Each object will also have related prototype functions and static functions to get[MyObject]s, and queryByPrimaryKey, queryByForeignKey.

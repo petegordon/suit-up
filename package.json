@@ -1,5 +1,5 @@
 {
-  "name": "suit-tailor",
+  "name": "suit-up",
   "version": "1.0.0",
   "description": "",
   "main": "desire_app.js",
@@ -29,7 +29,6 @@
   "homepage": "https://github.com/petegordon/conceptual-integrity#readme",
   "preferGlobal": "true",
   "bin": {
-    "suit-tailor": "./bin/generateJS",
-    "suit": "./bin/generateJS"
+    "suit-up": "./bin/generateJS",
   }
 }
