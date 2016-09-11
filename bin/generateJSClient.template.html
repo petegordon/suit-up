@@ -1,0 +1,38 @@
+<template bind="{{t as table}}">
+/**
+ *
+ * Model Object Constructor
+ *
+ */
+function {{table.name}}( <template repeat="{{column, i in table.columns}}"><template if="{{i > 0}}">, </template>{{column.varName}}</template> ){
+
+  <template repeat="{{column in table.columns}}">
+    this.{{column.varName}} = {{column.varName}};
+  </template>
+
+}
+
+/**
+ * Save a {{table.name}} instance.
+ *
+ * Will query to see if it exists first, then update if it exists and insert if it does not exist.
+ */
+{{table.name}}.prototype.save = function(fnCallback){
+
+  var currentObject = this;
+
+  $.ajax({
+    type: 'POST',
+    url: '/save/{{table.name}}',
+    data: JSON.stringify(currentObject),
+    success: function(data) {
+      if(fnCallback){
+        fnCallback(data);
+      }
+    },
+    contentType: "application/json",
+    dataType: 'json'
+  });
+
+}
+</template>

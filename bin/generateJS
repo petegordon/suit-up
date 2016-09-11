@@ -324,14 +324,21 @@ function createDatabaseMetadata(){
     for(var i=0; i<databaseMetadata.tables.length; i++){
       var template = HTMLing.file(__dirname+"/generateJS.template.html");
       var obj = {t:databaseMetadata.tables[i]};
-//      console.log(obj);
       var jsFile = template.render(obj);
-
-//      console.log('--------------'+databaseMetadata.tables[i].dbName);
-
       fs.writeFileSync(process.cwd()+'/'+databaseMetadata.name+'/'+databaseMetadata.tables[i].name+'.js', jsFile);
-//      console.log(jsFile);
-      console.log("The file was saved!");
+      console.log("The server file was saved!");
+
+      var client_path = process.cwd()+'/'+databaseMetadata.name+'/js/';
+      try {
+          fs.accessSync(client_path, fs.F_OK);
+      } catch (e) {
+          fs.mkdirSync(client_path);
+      }
+      var client_template = HTMLing.file(__dirname+"/generateJSClient.template.html");
+      var client_obj = {t:databaseMetadata.tables[i]};
+      var client_jsFile = client_template.render(client_obj);
+      fs.writeFileSync(client_path+databaseMetadata.tables[i].name+'.js', client_jsFile);
+      console.log("The client file was saved!");
     }
 
 
@@ -342,7 +349,7 @@ function createDatabaseMetadata(){
 
     var databaseTemplate = HTMLing.file(__dirname+'/'+"generateDatabaseConnectionJS.template.html");
     var databaseJSFile = databaseTemplate.render(databaseMetadata);
-    fs.writeFileSync(process.cwd()+'/'+databaseMetadata.name+'/'+'DatabaseConnection'+'.js', databaseJSFile);    
+    fs.writeFileSync(process.cwd()+'/'+databaseMetadata.name+'/'+'DatabaseConnection'+'.js', databaseJSFile);
 
   });
 }
