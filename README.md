@@ -1,4 +1,5 @@
-
+## Suit Up and generate Sqlite User Interface Toolkit.
+![](./keep-call-and-suit-up.png=88x103)
 
 ## What you need
 You need a SQLite CREATE sql script or an existing SQLite database from which you would like to create JavaScript Object sweetness.
@@ -19,7 +20,7 @@ You need a SQLite CREATE sql script or an existing SQLite database from which yo
 		$ suit-up -db my.db
 
 ## What do you get?
-  You will get a Javascript Object File for each table.  Each object will use underscore (_) to create capital letters for Object name, Function (method) names, and variables in CamelCase/camelCase format.  Each object will also have related prototype functions and static functions to get[MyObject]s, and queryByPrimaryKey, queryByForeignKey.
+  You will get a Javascript Object File and a CRUD (Create, Read Update, Delete) UI for each table.  Each object will use underscore (_) to create capital letters for Object name, Function (method) names, and variables in CamelCase/camelCase format.  Each object will also have related prototype functions and static functions to get[MyObject]s, and queryByPrimaryKey, queryByForeignKey.
 
 Here's an example create sql script to start with...
 
