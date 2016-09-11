@@ -1,5 +1,5 @@
 ## Suit Up and generate Sqlite User Interface Toolkit.
-![](./keep-call-and-suit-up.png=88x103)
+![](keep-call-and-suit-up.png)
 
 ## What you need
 You need a SQLite CREATE sql script or an existing SQLite database from which you would like to create JavaScript Object sweetness.
