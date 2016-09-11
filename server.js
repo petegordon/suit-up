@@ -11,7 +11,7 @@ var ObjectDesire = require('./desire/ObjectDesire.js');
 var MyDesire = require('./desire/MyDesire.js');
 
 app.use(express.static('public'));
-app.use('/desire', express.static('desire'));
+app.use('/js', express.static('desire/js'));
 
 app.use(bodyParser.json());
 
@@ -64,10 +64,19 @@ app.get('/pageObjects/:object/:start/:end', function(req, res){
   var tableName = req.params.object;
   var objArray = eval(req.params.object).queryAll();
   var start = parseInt(req.params.start);
+  if(start < 1){ start = 0;}
+  if(start >= objArray.length){
+    start = objArray.length;
+  }
   var end = parseInt(req.params.end);
-  var startZeroBased = start-1;
-  var endZeroBased = end-1;
-  var resultArray = objArray.slice(startZeroBased, endZeroBased)
+  if(end < 1){
+    end = 0;
+  }
+  if(end >= objArray.length){
+    end = objArray.length;
+  }
+
+  var resultArray = objArray.slice(start, end)
   console.log(req.params.object);
   var tablePage = {};
   tablePage.table = tableName;
