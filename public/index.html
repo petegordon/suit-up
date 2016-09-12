@@ -141,16 +141,26 @@
       });
     });
 
+    $(document).on('click', '.delete-button', function(evt){
+      var $el = $(evt.target);
+      var tableName = $el.closest('table').find('caption .table-title').text();
+      var nameElements = $el.closest('table').find('thead tr th.column-name');
+      var valueElements = $el.closest('tr').find('td');
 
-//    var win = $(window);
-/*
-    var scrolltop=$('#scrollbox').attr('scrollTop');
-    var scrollheight=$('#scrollbox').attr('scrollHeight');
-    var windowheight=$('#scrollbox').attr('clientHeight');
-    var scrolloffset=20;
-    if(scrolltop>=(scrollheight-(windowheight+scrolloffset)))
-    {
-*/
+      var obj = {};
+      for(var i=0; i<nameElements.length; i++){
+        obj[$(nameElements[i]).text()] = $(valueElements[i]).text();
+      }
+      deleteObject(tableName, obj, function(ret){
+        console.log('finished delete')
+        console.log(ret);
+        if(ret){
+          $el.closest('tr').css('background-color', 'rgb(255, 177, 177)')
+          $el.html('&#9100;')
+        }
+      });
+
+    });
 
   });
 
@@ -171,6 +181,29 @@
           console.log(data);
           if(callback){
             callback();
+          }
+        },
+        contentType: "application/json",
+        dataType: 'json'
+      });
+
+    }
+
+    function deleteObject(table, json, callback){
+      if(!table){
+        throw new Error("saveObject:Table not defined table:"+table);
+      }
+      if(!json){
+        throw new Error("saveObject:JSON not defined json:"+json)
+      }
+      $.ajax({
+        type: 'POST',
+        url: '/delete/'+table,
+        data: JSON.stringify(json), // or JSON.stringify ({name: 'jonas'}),
+        success: function(data) {
+          console.log(data);
+          if(callback){
+            callback(data);
           }
         },
         contentType: "application/json",
@@ -240,6 +273,14 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
         var plusButton = $('#add-object').clone();
         plusButton.attr('id', paging.table+'-add-object-plus-button');
         $('#'+paging.table+'-table-header-caption').append(plusButton);
+        plusButton.show();
+
+        //add plus button to Table caption float right
+        var toggleTableVisibleButton = $('#toggle-table-visible').clone();
+        toggleTableVisibleButton.attr('id', paging.table+'-toggle-table-visible-button');
+        $('#'+paging.table+'-table-header-caption').append(toggleTableVisibleButton);
+        toggleTableVisibleButton.show();
+
 
         //build header row
         $('<thead/>').appendTo('#'+paging.table);
@@ -306,7 +347,11 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
           console.log('click plus button');
           $(evt.target).closest('table').find('#'+paging.table+'-table-header-add-object-row').css('display', 'block');
         });
-
+        $('#'+paging.table+'-toggle-table-visible-button').click(function(evt){
+          console.log('click expand/collapse button');
+          $(evt.target).closest('table').find('thead').toggle();
+          $(evt.target).closest('table').find('tbody').toggle();
+        });
         /* add tbody */
         $('<tbody/>').appendTo('#'+paging.table);
         // Each time the user scrolls
@@ -363,13 +408,23 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
                 text: paging.result[i][property]
             }).appendTo('#'+paging.table+'-table-row-'+paging.result[i].id);
         }
+        $('<td/>', {
+            id: paging.table+'-table-row-'+paging.result[i].id+'-action-items',
+            class: 'action-items'
+        }).appendTo('#'+paging.table+'-table-row-'+paging.result[i].id);
+        $('<button/>', {
+            class: 'delete-button',
+            text: 'X'
+        }).appendTo('#'+paging.table+'-table-row-'+paging.result[i].id+'-action-items');
+
       }
     }
   </script>
 </head>
 
 <body>
-  <span id="add-object" style="float:right">+</span>
+  <span id="add-object" style="display:none;float:left">+</span>
+  <span id="toggle-table-visible" style="display:none;float:right">&darr;</span>
   <span id="loading" class="loading template">
   <style type='text/css'>
   @-webkit-keyframes uil-default-anim {

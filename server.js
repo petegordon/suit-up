@@ -41,6 +41,17 @@ app.post('/save/:object', function(req, res){
   object = object.save();
   res.send(object);
 });
+
+app.post('/delete/:object', function(req, res){
+  console.log(req.params.object);
+  var object = req.body;
+  console.log(object);
+  Object.setPrototypeOf(object, eval(req.params.object+'.prototype'));
+  console.log(object);
+  retObject = object.delete();
+  res.send(retObject);
+});
+
 app.get('/queryObjectByPK/:object/:id', function(req, res){
   var obj = eval(req.params.object).queryByPrimaryKeyId(req.params.id);
   console.log(obj);
