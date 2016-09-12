@@ -2,6 +2,7 @@
 
 
 var sync = require('deasync');
+var DatabaseConnection = require('./DatabaseConnection')
   
 var ObjectDesire = require('./ObjectDesire');
   
@@ -268,6 +269,8 @@ MyObject.queryByPrimaryKeyId = function( id, fnCallback ){
           console.log('------------ASYNC END PRIMARY KEY QUERY MyObject(id)-----------'+new Date());
           fnCallback(objects);
         }
+      } else if(results.length == 0){
+        ret = null;
       }
     }
 

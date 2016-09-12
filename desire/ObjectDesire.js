@@ -2,6 +2,7 @@
 
 
 var sync = require('deasync');
+var DatabaseConnection = require('./DatabaseConnection')
   
 
 
@@ -79,7 +80,7 @@ ObjectDesire.getObjectFromSQLResult = function(sqlResult){
              if(results.length >= 1){
                //when exists
                //execute update statement
-               ObjectDesire.db().run('update object_desire set  my_object_id = ? and  my_desire_id = ?  where  id = ? ',
+               ObjectDesire.db().run('update object_desire set  my_object_id = ? ,  my_desire_id = ?  where  id = ? ',
       [ currentObject.myObjectId , currentObject.myDesireId , currentObject.id],
        function(err){
                  if(fnCallback == null){
@@ -270,6 +271,8 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
           console.log('------------ASYNC END PRIMARY KEY QUERY ObjectDesire(id)-----------'+new Date());
           fnCallback(objects);
         }
+      } else if(results.length == 0){
+        ret = null;
       }
     }
 
@@ -333,6 +336,8 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
             console.log('------------ASYNC END FOREIGN KEY QUERY ObjectDesire(myDesireId, myObjectId)-----------'+new Date());
             fnCallback(objects);
           }
+        } else if(results.length == 0){
+          ret = null;
         }
     }
 
@@ -394,6 +399,8 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
             console.log('------------ASYNC END FOREIGN KEY QUERY ObjectDesire(myDesireId)-----------'+new Date());
             fnCallback(objects);
           }
+        } else if(results.length == 0){
+          ret = null;
         }
     }
 
@@ -455,6 +462,8 @@ ObjectDesire.queryByPrimaryKeyId = function( id, fnCallback ){
             console.log('------------ASYNC END FOREIGN KEY QUERY ObjectDesire(myObjectId)-----------'+new Date());
             fnCallback(objects);
           }
+        } else if(results.length == 0){
+          ret = null;
         }
     }
 
