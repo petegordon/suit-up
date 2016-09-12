@@ -1,5 +1,5 @@
 ## Suit Up and generate Sqlite User Interface Toolkit.
-![](keep-call-and-suit-up.png)
+![](keep-call-and-suit-up.png)          <a href="https://www.youtube.com/watch?v=x1gZBfsHqAk" /><img src="https://img.youtube.com/vi/x1gZBfsHqAk/0.jpg" width="335"></a>
 
 ## What you need
 You need a SQLite CREATE sql script or an existing SQLite database from which you would like to create JavaScript Object sweetness.
