@@ -75,11 +75,11 @@
       background-color: rgba(130, 161, 251, 0.29);
     }
 
-    #loading {
+    .loading {
       display:none;
       background-color:blue;
     }
-    #loading div {
+    .loading div {
   /*
       width: 15px;
       height: 71px;
@@ -120,7 +120,7 @@
       $(evt.target).attr('contenteditable','true');
       $(evt.target).focus();
       var originalValue = $(evt.target).text();
-      $(evt.target).on('blur', function(evt){
+      $(evt.target).off('blur').on('blur', function(evt){
         $(evt.target).attr('contenteditable','false');
         var newValue = $(evt.target).text();
         if(newValue != originalValue){
@@ -180,19 +180,24 @@
     }
 
     function getObjects(table, start, end, callback){
+      var tableName = table;
       $.ajax({
         type: 'GET',
         url: '/pageObjects/'+table+'/'+start+'/'+end,
-        success: function(data) {
+        success: function(paging) {
 /**
 SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
           for(var i=0; i<data.result.length; i++){
             data.result[i].__proto__ = eval('MyObject'+'.prootype');
           }
 **/
-          console.log(data);
+          console.log(paging);
+          $('#'+tableName).attr('data-totalrecords', paging.total);
+          $('#'+tableName).attr('data-laststartrecord', paging.start);
+          $('#'+tableName).attr('data-lastendrecord', paging.end);
+
           if(callback){
-            callback(data);
+            callback(paging);
           }
         },
         dataType: 'json'
@@ -200,6 +205,7 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
     }
 
     function createTable(tableName){
+
       getObjects(tableName, 0, 10, function(paging){
 /*
         //determine numberOfColumns
@@ -211,15 +217,22 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
         $('tbody td').css('width',  columnWidth);
         $('thead th').css('width',  columnWidth);
 */
+        $('<table/>', {
+          id:paging.table,
+          'data-totalrecords':paging.total,
+          'data-lastendrecord':paging.end,
+          'data-laststartrecord':paging.start,
+          'data-tablename':paging.table
+        }).appendTo('body');
 
         //build table header caption
         $('<caption/>', {
             id: paging.table+'-table-header-caption',
             class: 'caption'
-        }).prependTo('#table');
+        }).prependTo('#'+paging.table);
         $('#'+paging.table+'-table-header-caption').append($('<span/>', {class:'table-title', style:'left:20px;position:relative',text:tableName}))
         //add loading icon before caption Entity name.
-        var loading = $('#loading.template');
+        var loading = $('#loading.template').clone();
         loading.removeClass('template');
         $('#'+paging.table+'-table-header-caption').append(loading);
 
@@ -229,11 +242,11 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
         $('#'+paging.table+'-table-header-caption').append(plusButton);
 
         //build header row
-        $('<thead/>').appendTo('#table');
+        $('<thead/>').appendTo('#'+paging.table);
         $('<tr/>', {
             id: paging.table+'-table-header-row',
             class: 'row'
-        }).appendTo('thead');
+        }).appendTo('#'+paging.table+' thead');
         for(property in paging.result[0]){
             $('<th/>', {
                 class: 'header-cell column-name',
@@ -246,7 +259,7 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
           id:paging.table+"-table-header-add-object-row",
           class:'row add-object',
           style:'display:none'
-        }).appendTo('thead');
+        }).appendTo('#'+paging.table+' thead');
 
         for(property in paging.result[0]){
             $('<th/>', {
@@ -277,11 +290,12 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
           console.log('object to add save');
           console.log(obj);
           save(paging.table, obj, function(obj){
-            $('#loading').show();
-            getObjects('MyObject', currentMaxRecord, (currentMaxRecord+numOfRecordsToGet), function(paging){
+            $('#'+paging.table+' .loading').show();
+            var lastEndRecord = parseInt($('#'+tableName).attr('data-totalrecords'))
+            getObjects(paging.table, lastEndRecord, (lastEndRecord+numOfRecordsToGet), function(paging){
               buildRows(paging);
               lastLoad = new Date();
-              $('#loading').hide();
+              $('#'+paging.table+' .loading').hide();
             });
           });
           //hide the add/save row
@@ -290,33 +304,33 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
         });
         $('#'+paging.table+'-add-object-plus-button').click(function(evt){
           console.log('click plus button');
-          $(evt.target).closest('#table').find('#'+paging.table+'-table-header-add-object-row').css('display', 'block');
+          $(evt.target).closest('table').find('#'+paging.table+'-table-header-add-object-row').css('display', 'block');
         });
 
         /* add tbody */
-        $('<tbody/>').appendTo('#table');
+        $('<tbody/>').appendTo('#'+paging.table);
         // Each time the user scrolls
-        $('#table tbody').on('scroll', function() {
-    //      console.log('test')
-          var el = $('#table tbody').get(0);
+        $('#'+paging.table+' tbody').on('scroll', function(evt) {
+          var el = $(evt.target).get(0)
+          var tableName = $(evt.target).closest('table').find('caption .table-title').text();
 //          console.log('document height:'+$(document).height()+' window height:'+$('#table tbody').height()+' window scroll top:'+$('#table tbody').scrollTop() )
           var scrolltop=el.scrollTop;
           var scrollheight=el.scrollHeight;
           var windowheight=el.clientHeight;
-//          console.log('scroll top:'+scrolltop+' scroll height:'+scrollheight+' window height:'+windowheight);
+          //console.log('scroll top:'+scrolltop+' scroll height:'+scrollheight+' window height:'+windowheight);
           // End of the document reached?
           if ((scrollheight - (windowheight + scrolltop)) < 5){
 
 
             var timeSinceLastLoad = new Date() - lastLoad;
-            console.log(timeSinceLastLoad)
-            if(timeSinceLastLoad > 500 && !$('#loading').is(":visible")){
-              $('#loading').show();
-
-              getObjects('MyObject', currentMaxRecord, (currentMaxRecord+numOfRecordsToGet), function(paging){
+            if(timeSinceLastLoad > 500 && !$('#'+tableName+' .loading').is(":visible")){
+              lastLoad = new Date();
+              $('#'+tableName+' .loading').show();
+              var lastEndRecord = parseInt($('#'+tableName).attr('data-lastendrecord'));
+              getObjects(tableName, lastEndRecord, (lastEndRecord+numOfRecordsToGet), function(paging){
                 buildRows(paging);
                 lastLoad = new Date();
-                $('#loading').hide();
+                $('#'+tableName+' .loading').hide();
               });
             }
 
@@ -325,16 +339,6 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
 
         buildRows(paging);
 
-/*
-TODO::Let's do paging by scrolling!!!!! instead of this!!!!
-
-        //build table caption
-        $('<div/>', {
-            id: paging.table+'-table-footer-caption',
-            class: 'caption',
-            text: 'PAGIN INFO GOES HERE'
-        }).appendTo('#outerTable');
-*/
 
       });
     }
@@ -351,7 +355,7 @@ TODO::Let's do paging by scrolling!!!!! instead of this!!!!
         $('<tr/>', {
             id: paging.table+'-table-row-'+paging.result[i].id,
             class: 'row'
-        }).appendTo('#table tbody');
+        }).appendTo('#'+paging.table+' tbody');
         //build cells in row
         for(property in paging.result[i]){
             $('<td/>', {
@@ -366,7 +370,7 @@ TODO::Let's do paging by scrolling!!!!! instead of this!!!!
 
 <body>
   <span id="add-object" style="float:right">+</span>
-  <span id="loading" class="template">
+  <span id="loading" class="loading template">
   <style type='text/css'>
   @-webkit-keyframes uil-default-anim {
     0% {
@@ -484,8 +488,6 @@ TODO::Let's do paging by scrolling!!!!! instead of this!!!!
   <div style='-webkit-transform:rotate(330deg) translate(0,-48px);transform:rotate(330deg) translate(0,-48px);'></div>
 </div>
   </span>
-
-<table id="table"></table>
 
 
 
