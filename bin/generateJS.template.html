@@ -168,6 +168,53 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
 
   }
 
+
+   /**
+    * Methods to query all count {{table.name}} instances returns {total:1000}.
+    */
+   {{table.name}}.queryAllCount= function( fnCallback ){
+     var ret;
+
+      if(fnCallback == null){
+        console.log('------------SYNC ALL COUNT QUERY {{table.name}}-----------'+new Date());
+      }else{
+        console.log('------------ASYNC ALL COUNT QUERY {{table.name}}-----------'+new Date());
+      }
+
+     var sql = "select count(*) as count from {{table.dbName}}";
+     console.log(sql);
+     {{table.name}}.db().all(sql, [], function(err, results){
+       if(err){
+         console.log('ERROR::');
+         console.log(err);
+         if(fnCallback == null){
+           ret = err;
+         } else {
+           console.log('------------ASYNC END ALL COUNT QUERY {{table.name}}_----------'+new Date());
+           fnCallback(err);
+         }
+       } else {
+           if(fnCallback == null){
+             ret = results[0];
+           } else {
+             console.log('------------ASYNC END ALL COUNT QUERY {{table.name}}_----------'+new Date());
+             fnCallback(results[0]);
+           }
+       }
+
+
+     });
+
+     if(fnCallback == null){
+       while(ret === undefined){
+         require('deasync').runLoopOnce();
+       }
+       console.log('------------SYNC END ALL COUNT QUERY {{table.name}}_----------'+new Date());
+       return ret;
+     }
+
+   }
+
  /**
   * Methods to query all {{table.name}} instances.
   */
@@ -217,6 +264,58 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
    }
 
  }
+
+
+  /**
+   * Methods to query page (start to end) of {{table.name}} instances.  start index is inclusive, end index is exclusive.  The translation
+   *  to SQLite LIMIT OFFSET is this OFFSET=(start)  LIMIT=(end-start)
+   */
+  {{table.name}}.queryPage= function(start, end, fnCallback ){
+    var ret;
+
+     if(fnCallback == null){
+       console.log('------------SYNC PAGE QUERY {{table.name}}-----------'+new Date());
+     }else{
+       console.log('------------ASYNC PAGE QUERY {{table.name}}-----------'+new Date());
+     }
+
+    var sql = "select * from {{table.dbName}} LIMIT ? OFFSET ?";
+    console.log(sql);
+    {{table.name}}.db().all(sql, [(end-start), (start)], function(err, results){
+      if(err){
+        console.log('ERROR::');
+        console.log(err);
+        if(fnCallback == null){
+          ret = err;
+        } else {
+          console.log('------------ASYNC END ALL QUERY {{table.name}}_----------'+new Date());
+          fnCallback(err);
+        }
+      } else {
+          var objects = [];
+          for(var i=0; i<results.length; i++){
+            objects.push({{table.name}}.getObjectFromSQLResult(results[i]));
+          }
+          if(fnCallback == null){
+            ret = objects;
+          } else {
+            console.log('------------ASYNC END ALL QUERY {{table.name}}_----------'+new Date());
+            fnCallback(objects);
+          }
+      }
+
+
+    });
+
+    if(fnCallback == null){
+      while(ret === undefined){
+        require('deasync').runLoopOnce();
+      }
+      console.log('------------SYNC END ALL QUERY {{table.name}}_----------'+new Date());
+      return ret;
+    }
+
+  }
 
 
 <template repeat="{{s in table.primaryKeySignatureSQLs}}">

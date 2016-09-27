@@ -174,6 +174,53 @@ ObjectDesire.getObjectFromSQLResult = function(sqlResult){
 
   }
 
+
+   /**
+    * Methods to query all count ObjectDesire instances returns {total:1000}.
+    */
+   ObjectDesire.queryAllCount= function( fnCallback ){
+     var ret;
+
+      if(fnCallback == null){
+        console.log('------------SYNC ALL COUNT QUERY ObjectDesire-----------'+new Date());
+      }else{
+        console.log('------------ASYNC ALL COUNT QUERY ObjectDesire-----------'+new Date());
+      }
+
+     var sql = "select count(*) as count from object_desire";
+     console.log(sql);
+     ObjectDesire.db().all(sql, [], function(err, results){
+       if(err){
+         console.log('ERROR::');
+         console.log(err);
+         if(fnCallback == null){
+           ret = err;
+         } else {
+           console.log('------------ASYNC END ALL COUNT QUERY ObjectDesire_----------'+new Date());
+           fnCallback(err);
+         }
+       } else {
+           if(fnCallback == null){
+             ret = results[0];
+           } else {
+             console.log('------------ASYNC END ALL COUNT QUERY ObjectDesire_----------'+new Date());
+             fnCallback(results[0]);
+           }
+       }
+
+
+     });
+
+     if(fnCallback == null){
+       while(ret === undefined){
+         require('deasync').runLoopOnce();
+       }
+       console.log('------------SYNC END ALL COUNT QUERY ObjectDesire_----------'+new Date());
+       return ret;
+     }
+
+   }
+
  /**
   * Methods to query all ObjectDesire instances.
   */
@@ -223,6 +270,58 @@ ObjectDesire.getObjectFromSQLResult = function(sqlResult){
    }
 
  }
+
+
+  /**
+   * Methods to query page (start to end) of ObjectDesire instances.  start index is inclusive, end index is exclusive.  The translation
+   *  to SQLite LIMIT OFFSET is this OFFSET=(start-1)  LIMIT=(end-start)
+   */
+  ObjectDesire.queryPage= function(start, end, fnCallback ){
+    var ret;
+
+     if(fnCallback == null){
+       console.log('------------SYNC PAGE QUERY ObjectDesire-----------'+new Date());
+     }else{
+       console.log('------------ASYNC PAGE QUERY ObjectDesire-----------'+new Date());
+     }
+
+    var sql = "select * from object_desire LIMIT ? OFFSET ?";
+    console.log(sql);
+    ObjectDesire.db().all(sql, [(end-start), (start-1)], function(err, results){
+      if(err){
+        console.log('ERROR::');
+        console.log(err);
+        if(fnCallback == null){
+          ret = err;
+        } else {
+          console.log('------------ASYNC END ALL QUERY ObjectDesire_----------'+new Date());
+          fnCallback(err);
+        }
+      } else {
+          var objects = [];
+          for(var i=0; i<results.length; i++){
+            objects.push(ObjectDesire.getObjectFromSQLResult(results[i]));
+          }
+          if(fnCallback == null){
+            ret = objects;
+          } else {
+            console.log('------------ASYNC END ALL QUERY ObjectDesire_----------'+new Date());
+            fnCallback(objects);
+          }
+      }
+
+
+    });
+
+    if(fnCallback == null){
+      while(ret === undefined){
+        require('deasync').runLoopOnce();
+      }
+      console.log('------------SYNC END ALL QUERY ObjectDesire_----------'+new Date());
+      return ret;
+    }
+
+  }
 
 
 

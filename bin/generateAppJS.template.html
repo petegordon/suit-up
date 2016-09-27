@@ -13,6 +13,13 @@ var app = express();
 /**
  *  Asynchronous calls for Querying Objects.
  */
+ <template repeat="{{table in tables}}">
+   {{table.name}}.queryAllCount(function(count{{table.name}}s){
+     console.log('Count ALL:: {{table.name}} records.');
+     console.log(count{{table.name}}s);
+
+   });
+ </template>
 <template repeat="{{table in tables}}">
   {{table.name}}.queryAll(function(all{{table.name}}s){
     console.log('ASYNC ALL::'+all{{table.name}}s.length + '. {{table.name}} records.');
@@ -115,7 +122,7 @@ app.get('/', function (req, res) {
   output += 'http://localhost:3000/queryObjectByFK/ObjectDesire/MyObject/Id/1';
   output += breakStr;
   res.send(output);
-  
+
 });
 
 var server = app.listen(3000, function () {

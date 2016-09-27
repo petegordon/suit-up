@@ -17,6 +17,25 @@ var app = express();
 /**
  *  Asynchronous calls for Querying Objects.
  */
+ 
+   MyObject.queryAllCount(function(countMyObjects){
+     console.log('Count ALL:: MyObject records.');
+     console.log(countMyObjects);
+
+   });
+ 
+   ObjectDesire.queryAllCount(function(countObjectDesires){
+     console.log('Count ALL:: ObjectDesire records.');
+     console.log(countObjectDesires);
+
+   });
+ 
+   MyDesire.queryAllCount(function(countMyDesires){
+     console.log('Count ALL:: MyDesire records.');
+     console.log(countMyDesires);
+
+   });
+ 
 
   MyObject.queryAll(function(allMyObjects){
     console.log('ASYNC ALL::'+allMyObjects.length + '. MyObject records.');
@@ -181,7 +200,7 @@ app.get('/', function (req, res) {
   output += 'http://localhost:3000/queryObjectByFK/ObjectDesire/MyObject/Id/1';
   output += breakStr;
   res.send(output);
-  
+
 });
 
 var server = app.listen(3000, function () {

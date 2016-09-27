@@ -73,27 +73,17 @@ app.get('/pageObjects/:object/:start/:end', function(req, res){
   console.log('all object');
   console.log(req.params);
   var tableName = req.params.object;
-  var objArray = eval(req.params.object).queryAll();
   var start = parseInt(req.params.start);
-  if(start < 1){ start = 0;}
-  if(start >= objArray.length){
-    start = objArray.length;
-  }
   var end = parseInt(req.params.end);
-  if(end < 1){
-    end = 0;
-  }
-  if(end >= objArray.length){
-    end = objArray.length;
-  }
-
-  var resultArray = objArray.slice(start, end)
+  var total = eval(req.params.object).queryAllCount().count;
+  var resultArray = eval(req.params.object).queryPage(start, end);
   console.log(req.params.object);
   var tablePage = {};
+
   tablePage.table = tableName;
-  tablePage.total = objArray.length;
-  tablePage.start = start;
-  tablePage.end = end;
+  tablePage.total = total;
+  tablePage.start = (start>total)?total:start;
+  tablePage.end = (end >= total)?(total):(end);
   tablePage.result = resultArray;
   res.send(tablePage);
 });

@@ -3,9 +3,9 @@
 
 var sync = require('deasync');
 var DatabaseConnection = require('./DatabaseConnection')
-  
+
 var ObjectDesire = require('./ObjectDesire');
-  
+
 
 
 /**
@@ -15,11 +15,11 @@ var ObjectDesire = require('./ObjectDesire');
  */
 function MyObject( id, isSomething ){
 
-  
+
     this.id = id;
-  
+
     this.isSomething = isSomething;
-  
+
 
 }
 
@@ -31,11 +31,11 @@ MyObject.db = function(){
 MyObject.getObjectFromSQLResult = function(sqlResult){
 
   var obj = new MyObject();
-  
+
   obj.id = sqlResult.id;
-  
+
   obj.isSomething = sqlResult.is_something;
-  
+
   return obj;
 
 }
@@ -51,11 +51,11 @@ MyObject.getObjectFromSQLResult = function(sqlResult){
    var currentObject = this;
 
    console.log('------------SAVE MyObject-----------'+new Date());
-    
+
     if(typeof this.id == 'undefined'){
       this.id = -1;
     }
-    
+
 
    //query by current Primary Key
    var sql = "select * from my_object where id = ?";
@@ -130,11 +130,11 @@ MyObject.getObjectFromSQLResult = function(sqlResult){
        var currentObject = this;
 
        console.log('------------DELETE MyObject-----------'+new Date());
-        
+
         if(typeof this.id == 'undefined'){
           this.id = -1;
         }
-        
+
 
        //query by current Primary Key
        var sql = "delete from my_object where id = ?";
@@ -171,6 +171,53 @@ MyObject.getObjectFromSQLResult = function(sqlResult){
        }
 
   }
+
+
+   /**
+    * Methods to query all count MyObject instances returns {total:1000}.
+    */
+   MyObject.queryAllCount= function( fnCallback ){
+     var ret;
+
+      if(fnCallback == null){
+        console.log('------------SYNC ALL COUNT QUERY MyObject-----------'+new Date());
+      }else{
+        console.log('------------ASYNC ALL COUNT QUERY MyObject-----------'+new Date());
+      }
+
+     var sql = "select count(*) as count from my_object";
+     console.log(sql);
+     MyObject.db().all(sql, [], function(err, results){
+       if(err){
+         console.log('ERROR::');
+         console.log(err);
+         if(fnCallback == null){
+           ret = err;
+         } else {
+           console.log('------------ASYNC END ALL COUNT QUERY MyObject_----------'+new Date());
+           fnCallback(err);
+         }
+       } else {
+           if(fnCallback == null){
+             ret = results[0];
+           } else {
+             console.log('------------ASYNC END ALL COUNT QUERY MyObject_----------'+new Date());
+             fnCallback(results[0]);
+           }
+       }
+
+
+     });
+
+     if(fnCallback == null){
+       while(ret === undefined){
+         require('deasync').runLoopOnce();
+       }
+       console.log('------------SYNC END ALL COUNT QUERY MyObject_----------'+new Date());
+       return ret;
+     }
+
+   }
 
  /**
   * Methods to query all MyObject instances.
@@ -221,6 +268,58 @@ MyObject.getObjectFromSQLResult = function(sqlResult){
    }
 
  }
+
+
+  /**
+   * Methods to query page (start to end) of MyObject instances.  start index is inclusive, end index is exclusive.  The translation
+   *  to SQLite LIMIT OFFSET is this OFFSET=(start)  LIMIT=(end-start)
+   */
+  MyObject.queryPage= function(start, end, fnCallback ){
+    var ret;
+
+     if(fnCallback == null){
+       console.log('------------SYNC PAGE QUERY MyObject-----------'+new Date());
+     }else{
+       console.log('------------ASYNC PAGE QUERY MyObject-----------'+new Date());
+     }
+
+    var sql = "select * from my_object LIMIT ? OFFSET ?";
+    console.log(sql);
+    MyObject.db().all(sql, [(end-start), (start)], function(err, results){
+      if(err){
+        console.log('ERROR::');
+        console.log(err);
+        if(fnCallback == null){
+          ret = err;
+        } else {
+          console.log('------------ASYNC END ALL QUERY MyObject_----------'+new Date());
+          fnCallback(err);
+        }
+      } else {
+          var objects = [];
+          for(var i=0; i<results.length; i++){
+            objects.push(MyObject.getObjectFromSQLResult(results[i]));
+          }
+          if(fnCallback == null){
+            ret = objects;
+          } else {
+            console.log('------------ASYNC END ALL QUERY MyObject_----------'+new Date());
+            fnCallback(objects);
+          }
+      }
+
+
+    });
+
+    if(fnCallback == null){
+      while(ret === undefined){
+        require('deasync').runLoopOnce();
+      }
+      console.log('------------SYNC END ALL QUERY MyObject_----------'+new Date());
+      return ret;
+    }
+
+  }
 
 
 
@@ -303,4 +402,3 @@ MyObject.queryByPrimaryKeyId = function( id, fnCallback ){
 
 
 module.exports = MyObject
-

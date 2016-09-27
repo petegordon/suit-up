@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
 
-  <title>The HTML5 Herald</title>
+  <title>SUIT up CRUD interface</title>
   <meta name="description" content="CRUD Generated HTML">
   <meta name="author" content="CRUD Generated HTML">
 
@@ -108,8 +108,7 @@
 
   <script>
 
-  var currentMaxRecord = 0;
-  var totalMaxRecord = 0;
+
   var lastLoad = new Date(0);  //1970 for starting date
   var numOfRecordsToGet = 2;
 
@@ -388,12 +387,6 @@ SEE ABOVE HOW TO DO Prototype/Constructor on Client/FrontEnd
       });
     }
     function buildRows(paging){
-      if(paging.end > paging.total){
-        currentMaxRecord = paging.total+1;
-      } else {
-        currentMaxRecord = paging.end;
-      }
-      totalMaxRecord = paging.total;
 
       //build rows
       for(var i=0; i<paging.result.length; i++){
