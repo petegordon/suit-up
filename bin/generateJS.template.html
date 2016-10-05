@@ -454,7 +454,7 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
    * Method to query related {{relatedTable}}s and return an array of {{relatedTable}} instances
    */
   {{table.name}}.prototype.get{{relatedTable.name}}s = function(fnCallback){
-    {{relatedTable.name}}.{{relatedTable.signature}}( {{relatedTable.signatureParams}}, fnCallback );
+    return require('./{{relatedTable.name}}').{{relatedTable.signature}}( {{relatedTable.signatureParams}}, fnCallback );
   }
 </template>
 
@@ -463,7 +463,7 @@ function {{table.name}}( <template repeat="{{column, i in table.columns}}"><temp
    * Method to query related {{fk.objectName}} instance
    */
   {{table.name}}.prototype.get{{fk.objectName}} = function(fnCallback){
-    {{fk.objectName}}.queryByPrimaryKey(this.{{fk.varName}}, fnCallback);
+    return require('./{{fk.objectName}}').queryByPrimaryKeyId(this.{{fk.varName}}, fnCallback);
   }
 </template>
 

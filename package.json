@@ -11,6 +11,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "express": ">= 4.14.0",
     "body-parser": "^1.15.2",
     "deasync": ">=0.1.4",
     "htmling": ">=0.0.7",
